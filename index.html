@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SH-Radar — Structural Heart Intelligence</title>
+<meta name="description" content="Real-time structural heart disease news feed. TAVR, Mitral, Tricuspid, LAAC, clinical trials, regulatory updates.">
+
+<!-- Fonts -->
+<link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&f[]=cabinet-grotesk@700,800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="./base.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="#" class="logo" aria-label="SH-Radar Home">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="8" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/>
+            <circle cx="16" cy="16" r="3" fill="var(--color-accent)"/>
+            <line x1="16" y1="2" x2="16" y2="8" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="16" y1="24" x2="16" y2="30" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="2" y1="16" x2="8" y2="16" stroke="currentColor" stroke-width="1.5"/>
+            <line x1="24" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <span class="logo-text">SH<span class="logo-dash">—</span>Radar</span>
+        </a>
+        <span class="tagline">Structural Heart Intelligence</span>
+      </div>
+      <div class="header-right">
+        <div class="time-filter">
+          <button class="filter-btn active" data-hours="24">24h</button>
+          <button class="filter-btn" data-hours="48">48h</button>
+          <button class="filter-btn" data-hours="168">7d</button>
+        </div>
+        <button data-theme-toggle aria-label="Switch to light mode" class="theme-toggle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item" id="stat-total">
+        <span class="stat-value">—</span>
+        <span class="stat-label">articles</span>
+      </div>
+      <div class="stat-item" id="stat-categories">
+        <span class="stat-value">—</span>
+        <span class="stat-label">categories</span>
+      </div>
+      <div class="stat-item" id="stat-high">
+        <span class="stat-value">—</span>
+        <span class="stat-label">high relevance</span>
+      </div>
+      <div class="stat-updated">
+        Last updated: <span id="stat-time">—</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Loading state -->
+    <div class="loading-state" id="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Fetching latest articles...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state hidden" id="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="empty-icon">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      </svg>
+      <h3>No articles found</h3>
+      <p>No new articles in this time window. Try expanding the range.</p>
+    </div>
+
+    <!-- Error state -->
+    <div class="error-state hidden" id="error-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="error-icon">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <h3>Connection Error</h3>
+      <p>Could not reach the API. Please try again.</p>
+      <button class="retry-btn" onclick="fetchNews()">Retry</button>
+    </div>
+
+    <!-- Categories will be injected here -->
+    <div id="categories-container"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>Powered by Notion DB + Cloudflare Workers</p>
+      <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
+        Created with Perplexity Computer
+      </a>
+    </div>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
