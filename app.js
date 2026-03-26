@@ -97,28 +97,14 @@ function filterByHours(fullData, hours) {
 }
 
 /**
- * Try static JSON first (works behind corporate firewalls), then fall back to live API.
+ * Try live API first (real-time data), fall back to static JSON if blocked.
+ * This ensures personal devices get fresh data while corporate PCs still work.
  */
 async function fetchNewsData(hours) {
-  // Strategy 1: Static JSON from GitHub Pages (same origin — no CORS issues)
+  // Strategy 1: Live API (real-time, preferred)
   try {
-    const cacheBust = `?t=${Math.floor(Date.now() / 60000)}`; // bust cache every minute
-    const resp = await fetch(`${STATIC_DATA_URL}${cacheBust}`);
-    if (resp.ok) {
-      const fullData = await resp.json();
-      if (fullData && fullData.total > 0) {
-        console.log('Data loaded from static JSON');
-        return filterByHours(fullData, hours);
-      }
-    }
-  } catch (e) {
-    console.warn('Static JSON unavailable:', e.message);
-  }
-
-  // Strategy 2: Live API (may be blocked by corporate firewalls)
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const resp = await fetch(`${API_BASE}/news?hours=${hours}`, { signal: controller.signal });
     clearTimeout(timeout);
     if (!resp.ok) throw new Error(`API error ${resp.status}`);
@@ -126,9 +112,25 @@ async function fetchNewsData(hours) {
     console.log('Data loaded from live API');
     return data;
   } catch (e) {
-    clearTimeout(timeout);
-    throw new Error(`API unreachable (${e.name}: ${e.message}). This may be caused by a corporate firewall blocking workers.dev. Try accessing from a personal device.`);
+    console.warn('Live API unavailable:', e.message);
   }
+
+  // Strategy 2: Static JSON from GitHub Pages (fallback for corporate firewalls)
+  try {
+    const cacheBust = `?t=${Math.floor(Date.now() / 60000)}`;
+    const resp = await fetch(`${STATIC_DATA_URL}${cacheBust}`);
+    if (resp.ok) {
+      const fullData = await resp.json();
+      if (fullData && fullData.total > 0) {
+        console.log('Data loaded from static JSON (API was blocked)');
+        return filterByHours(fullData, hours);
+      }
+    }
+  } catch (e) {
+    console.warn('Static JSON also unavailable:', e.message);
+  }
+
+  throw new Error('All data sources failed. Live API may be blocked by a corporate firewall, and static data is unavailable.');
 }
 
 // ============ FETCH & RENDER ============
