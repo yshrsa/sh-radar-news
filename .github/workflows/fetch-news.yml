@@ -1,0 +1,41 @@
+name: Fetch News Data
+
+on:
+  schedule:
+    # Run every 3 hours (UTC 0,3,6,9,12,15,18,21)
+    - cron: '30 0,3,6,9,12,15,18,21 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch news from API
+        run: |
+          # Fetch 7-day data (covers all time filters: 24h, 48h, 7d)
+          curl -sf --max-time 30 \
+            "https://notion-chatbot-api.sh-radar.workers.dev/news?hours=168" \
+            -o data/news-7d.json
+
+          # Verify JSON is valid
+          python3 -c "import json; json.load(open('data/news-7d.json'))"
+
+          # Generate timestamp
+          echo "{\"fetched_at\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" > data/meta.json
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update news data $(date -u +%Y-%m-%dT%H:%M)"
+            git push
+          fi
