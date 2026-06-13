@@ -157,6 +157,18 @@
   gap: var(--space-4);
 }
 
+.portal-link {
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.portal-link:hover {
+  color: var(--color-accent);
+}
+
 .logo {
   display: flex;
   align-items: center;
