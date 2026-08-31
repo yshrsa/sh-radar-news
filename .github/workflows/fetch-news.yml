@@ -18,8 +18,12 @@ jobs:
       - name: Fetch news from API
         run: |
           # Fetch 7-day data (covers all time filters: 24h, 48h, 7d)
+          # Use a unique query value so an immediate repair/export does not
+          # persist the Worker's previous 5-minute response.
+          cache_bust="$(date +%s)"
           curl -sf --max-time 30 \
-            "https://notion-chatbot-api.sh-radar.workers.dev/news?hours=168" \
+            -H "Cache-Control: no-cache" \
+            "https://notion-chatbot-api.sh-radar.workers.dev/news?hours=168&v=${cache_bust}" \
             -o data/news-7d.json
 
           # Verify JSON is valid
