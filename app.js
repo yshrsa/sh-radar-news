@@ -158,11 +158,11 @@ async function fetchNews() {
       return;
     }
 
-    // Count high-relevance articles
+    // Count high-relevance articles (Notion values may include traffic-light emoji).
     let highCount = 0;
     for (const cat of data.categories) {
       for (const a of data.articles[cat]) {
-        if (a.relevance === 'High') highCount++;
+        if (normalizeRelevance(a.relevance) === 'High') highCount++;
       }
     }
 
@@ -199,6 +199,14 @@ function updateStats(total, cats, high) {
   document.getElementById('stat-time').textContent = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
 }
 
+function normalizeRelevance(value) {
+  const text = String(value || '').trim();
+  if (text.endsWith('High')) return 'High';
+  if (text.endsWith('Medium')) return 'Medium';
+  if (text.endsWith('Low')) return 'Low';
+  return '';
+}
+
 function createCategorySection(categoryName, articles) {
   const section = document.createElement('section');
   section.className = 'category-section reveal';
@@ -218,14 +226,15 @@ function createCategorySection(categoryName, articles) {
 }
 
 function createArticleCard(article) {
-  const relevanceClass = article.relevance === 'High' ? 'high-relevance'
-    : article.relevance === 'Medium' ? 'medium-relevance' : '';
+  const relevance = normalizeRelevance(article.relevance);
+  const relevanceClass = relevance === 'High' ? 'high-relevance'
+    : relevance === 'Medium' ? 'medium-relevance' : '';
 
-  const relevanceBadge = article.relevance === 'High'
+  const relevanceBadge = relevance === 'High'
     ? '<span class="badge badge-high">High</span>'
-    : article.relevance === 'Medium'
+    : relevance === 'Medium'
     ? '<span class="badge badge-medium">Medium</span>'
-    : article.relevance === 'Low'
+    : relevance === 'Low'
     ? '<span class="badge badge-low">Low</span>'
     : '';
 
